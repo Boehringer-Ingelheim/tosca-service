@@ -60,6 +60,8 @@ jobs:
         with:
           distribution: 'adopt'
           java-version: '17'
+      - name: Verify gradlew exists
+        run: ls -la
       - name: Build
         run: ./gradlew build
       - name: Test
