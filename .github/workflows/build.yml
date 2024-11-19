@@ -21,7 +21,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v1
+        uses: actions/checkout@v4
       - name: Validate Release
         if: github.event_name == 'release' || github.event_name == 'prerelease'
         run: |
@@ -54,9 +54,9 @@ jobs:
     needs: [precheck]
     steps:
       - name: Checkout
-        uses: actions/checkout@v1
+        uses: actions/checkout@v4
       - name: Setup JDK
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v4
         with:
           distribution: 'adopt'
           java-version: '17'
@@ -74,7 +74,7 @@ jobs:
           name: app-${{ needs.precheck.outputs.full_version }}
           path: client/build/libs/*.jar
       - name: Release Asset Upload
-        uses: svenstaro/upload-release-action@v1-release
+        uses: svenstaro/upload-release-action@v2
         if: github.event_name == 'release' || github.event_name == 'prerelease'
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
