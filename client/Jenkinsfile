@@ -1,0 +1,71 @@
+// See https://www.opendevstack.org/ods-documentation/ for usage and customization.
+
+@Library('ods-jenkins-shared-library@4.x') _
+node {
+  dockerRegistry = env.DOCKER_REGISTRY
+  toscaServer = env.TOSCA_SERVER
+  toscaClientId = env.TOSCA_SERVER_CLIENT_ID
+  toscaClientSecret = env.TOSCA_SERVER_CLIENT_SECRET
+  toscaPort = env.TOSCA_SERVER_PORT
+}
+odsComponentPipeline(
+  imageStreamTag: 'ods/jenkins-agent-jdk:4.x',
+    podContainers: [
+        containerTemplate(
+        name: 'jnlp',
+        image: "${dockerRegistry}/ods/jenkins-agent-jdk:4.x",
+        envVars: [
+          envVar(key: 'TOSCA_SERVER', value: toscaServer),
+          envVar(key: 'TOSCA_SERVER_CLIENT_ID', value: toscaClientId),
+          envVar(key: 'TOSCA_SERVER_CLIENT_SECRET', value: toscaClientSecret),
+		  envVar(key: 'TOSCA_SERVER_PORT', value: toscaPort)
+        ],
+        resourceRequestCpu: '300m',
+        resourceLimitCpu: '500m',
+        resourceRequestMemory: '1Gi',
+        resourceLimitMemory: '2Gi',
+        alwaysPullImage: true,
+        args: '${computer.jnlpmac} ${computer.name}'
+      )],
+  branchToEnvironmentMapping: [
+    'master': 'dev',
+    '*': 'dev',
+    // 'release/': 'test'
+  ]
+) { context ->
+    stageBuild(context)
+//     odsComponentStageScanWithSonar(context)
+    odsComponentStageBuildOpenShiftImage(context)
+    //if (context.gitBranch == 'master') {
+        odsComponentStageUploadToNexus(context,
+            [
+            repository: 'maven-releases',
+            distributionFile: 'toscactl.zip',
+            groupId: "com.bi.${context.projectId}",
+            artifactId: "${context.componentId}",
+            version: "${context.projectId}_development"
+            ])
+    //}
+  // odsComponentStageRolloutOpenShiftDeployment(context)
+}
+
+def stageBuild(def context) {
+  def javaOpts = "-Xmx512m"
+  def gradleTestOpts = "-Xmx128m"
+  def springBootEnv = context.environment
+  if (springBootEnv.contains('-dev')) {
+    springBootEnv = 'dev'
+  }
+  stage('Build and Unit Test') {
+    withEnv(["TAGVERSION=${context.tagversion}", "NEXUS_HOST=${context.nexusHost}", "NEXUS_USERNAME=${context.nexusUsername}", "NEXUS_PASSWORD=${context.nexusPassword}", "JAVA_OPTS=${javaOpts}","GRADLE_TEST_OPTS=${gradleTestOpts}","ENVIRONMENT=${springBootEnv}"]) {
+      def status = sh(script: "source use-j17.sh && ./gradlew clean build --stacktrace --no-daemon", returnStatus: true)
+      if (status != 0) {
+        error "Build failed!"
+      }
+      //if (context.gitBranch == 'master'){
+      	sh 'jpackage --input docker/ --name toscactl --main-jar app.jar --main-class org.springframework.boot.loader.JarLauncher --java-options "--enable-preview" --type app-image && source use-j11.sh'
+      	zip zipFile: 'toscactl.zip', archive: false, dir: 'toscactl'
+      //}
+    }
+  }
+}
