@@ -61,13 +61,13 @@ jobs:
           distribution: 'adopt'
           java-version: '17'
       - name: Verify gradlew exists
-        run: ls -la
+        run: cd client && ls -la
       - name: Build
-        run: ./gradlew build
+        run: cd client && ./gradlew.bat build
       - name: Test
-        run: ./gradlew test
+        run: cd client && ./gradlew test
       - name: Package
-        run: ./gradlew bootJar
+        run: cd client && ./gradlew bootJar
       - name: 'Archive JAR'
         uses: actions/upload-artifact@v4
         with:
