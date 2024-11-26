@@ -12,7 +12,7 @@ on:
 
 jobs:
   precheck:
-    runs-on: [ubuntu-20.04]
+    runs-on: [ubuntu-24.04]
     outputs:
       version: ${{ steps.get_version.outputs.version }}
       version_number: ${{ steps.get_version.outputs.version_number }}
@@ -50,7 +50,7 @@ jobs:
           fi
 
   build_client:
-    runs-on: [ubuntu-20.04]
+    runs-on: [ubuntu-24.04]
     needs: [precheck]
     steps:
       - name: Checkout
