@@ -1,0 +1,84 @@
+name: Build
+
+on:
+  push:
+  pull_request:
+    branches:
+      - main
+  release:
+    types:
+      - prereleased
+      - released
+
+jobs:
+  precheck:
+    runs-on: [ubuntu-24.04]
+    outputs:
+      version: ${{ steps.get_version.outputs.version }}
+      version_number: ${{ steps.get_version.outputs.version_number }}
+      full_version: ${{ steps.get_version.outputs.full_version }}
+      branchTag: ${{ steps.get_version.outputs.branchTag }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Validate Release
+        if: github.event_name == 'release' || github.event_name == 'prerelease'
+        run: |
+          TAG_NAME=${GITHUB_REF/refs\/tags\//}
+          VERSION_FILE=$(cat VERSION)
+          if [ "$TAG_NAME" != "$VERSION_FILE" ]; then
+            echo "tag $TAG_NAME not equals to VERSION file $VERSION_FILE"
+            exit 1
+          fi
+      - name: Get Versions
+        id: get_version
+        run: |
+          VERSION_FILE=$(cat VERSION)
+          echo ::set-output name=branchTag::$(echo $GITHUB_REF | cut -d / -f 3)
+          if [[ "$VERSION_FILE" =~ ^v([0-9]+)\.([0-9]+)(\.([0-9]+))?(\.([0-9]+))?$ ]] ; then
+               VERSION=${VERSION_FILE}.${{ github.run_number }}
+               VERSION_NUMBER=$(echo  "${VERSION_FILE}" | cut -d "v" -f 2).${{ github.run_number }}
+               SHORT_COMMIT=$(git rev-parse --short=4 HEAD)
+               FULL_VERSION="${VERSION}_${SHORT_COMMIT}"
+               echo ::set-output name=full_version::${FULL_VERSION}
+               echo ::set-output name=version::${VERSION}
+               echo ::set-output name=version_number::${VERSION_NUMBER}
+          else
+               echo "VERSION file doesn't have valid version format: ^v([0-9]+)\.([0-9]+)(\.([0-9]+))?(\.([0-9]+))?$"
+               exit 1
+          fi
+
+  build_client:
+    runs-on: [ubuntu-24.04]
+    needs: [precheck]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'adopt'
+          java-version: '17'
+      - name: Grant execute permission for gradlew
+        run: cd client && chmod +x gradlew
+      - name: Build
+        run: cd client && ./gradlew build
+      - name: Test
+        run: cd client && ./gradlew test
+      - name: Package
+        run: cd client && ./gradlew bootJar
+      - name: 'Archive JAR'
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-${{ needs.precheck.outputs.full_version }}
+          path: client/build/libs/*.jar
+      - name: Release Asset Upload
+        uses: svenstaro/upload-release-action@v2
+        if: github.event_name == 'release' || github.event_name == 'prerelease'
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: client/build/libs/*.jar
+          tag: ${{ needs.precheck.outputs.branchTag }}
+          overwrite: true
+          file_glob: true

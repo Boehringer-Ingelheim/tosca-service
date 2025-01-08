@@ -1,0 +1,70 @@
+buildscript {
+    ext {
+        no_nexus = true
+    }
+}
+
+plugins {
+    id 'jacoco'
+    id 'maven-publish'
+	id 'java'
+	id 'org.springframework.boot' version '2.7.1'
+	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+}
+
+group = 'edptoscaqs'
+version = '1.0.0'
+sourceCompatibility = '17'
+
+repositories {
+    mavenCentral()
+}
+
+ext['log4j2.version'] = '2.17.0'
+
+ext {
+	set('snippetsDir', file("build/generated-snippets"))
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-data-rest'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'javax.validation:validation-api:2.0.1.Final'
+    implementation 'org.apache.commons:commons-text:1.10.0'
+    implementation 'org.hibernate.validator:hibernate-validator:7.0.1.Final'
+    implementation 'info.picocli:picocli:4.6.1'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.14.3'
+    testImplementation group: 'junit', name: 'junit', version: '4.13.2'
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    runtimeOnly 'com.h2database:h2'
+    testImplementation group: 'org.mockito', name: 'mockito-all', version: '1.10.19'
+    testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
+    testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
+    testImplementation group: 'org.assertj', name: 'assertj-core', version: '3.24.2'
+    testImplementation 'org.springframework.security:spring-security-test'
+}
+
+
+bootJar {
+    archiveFileName = "app.jar"
+    destinationDirectory = file("$buildDir/../docker")
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled true
+    }
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            artifactId = rootProject.name
+            groupId = group
+            version = "${version}"
+            from components.java
+        }
+    }
+}
