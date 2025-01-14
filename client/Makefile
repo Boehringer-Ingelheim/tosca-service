@@ -7,11 +7,15 @@ VERSION=v0.1
 COMMIT=`git rev-parse --short=4 HEAD`
 BUILD_TIME=`date +"%m/%d/%Y %H:%M:%S"`
 
-build: get build_jar
+build: get build_jar build_linux
 
 build_jar: build_prepare
 	cd $(ROOT_DIR)
 	./gradlew build
+
+build_linux: build_prepare
+	cd $(ROOT_DIR)
+	GOOS=linux GOARCH=amd64 go build -o $(BUILD_DIR)/toscactl-linux-amd64 -ldflags "-X main.version=$(VERSION) -X main.commit=$(COMMIT)" ./cmd/toscactl
 
 test:
 	cd $(ROOT_DIR)
