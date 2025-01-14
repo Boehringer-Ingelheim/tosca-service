@@ -12,7 +12,7 @@ on:
 
 jobs:
   precheck:
-    runs-on: [ubuntu-20.04]
+    runs-on: [ubuntu-24.04]
     outputs:
       version: ${{ steps.get_version.outputs.version }}
       version_number: ${{ steps.get_version.outputs.version_number }}
@@ -50,7 +50,7 @@ jobs:
           fi
 
   build_client:
-    runs-on: [ubuntu-20.04]
+    runs-on: [ubuntu-24.04]
     needs: [precheck]
     steps:
       - name: Checkout
@@ -68,17 +68,23 @@ jobs:
         run: cd client && ./gradlew test
       - name: Package
         run: cd client && ./gradlew bootJar
-      - name: 'Archive JAR'
+      - name: Build toscactl-linux-amd64
+        run: cd client && make build_linux VERSION=${{ needs.precheck.outputs.version }} COMMIT=$(git rev-parse HEAD)
+      - name: 'Archive JAR and toscactl-linux-amd64'
         uses: actions/upload-artifact@v4
         with:
           name: app-${{ needs.precheck.outputs.full_version }}
-          path: client/build/libs/*.jar
+          path: |
+            client/build/libs/*.jar
+            client/build/toscactl-linux-amd64*
       - name: Release Asset Upload
         uses: svenstaro/upload-release-action@v2
         if: github.event_name == 'release' || github.event_name == 'prerelease'
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: client/build/libs/*.jar
+          file: |
+            client/build/libs/*.jar
+            client/build/toscactl-linux-amd64*
           tag: ${{ needs.precheck.outputs.branchTag }}
           overwrite: true
           file_glob: true
