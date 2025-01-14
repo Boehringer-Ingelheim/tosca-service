@@ -14,8 +14,9 @@ build_jar: build_prepare
 	./gradlew build
 
 build_linux: build_prepare
-	cd $(ROOT_DIR)
-	GOOS=linux GOARCH=amd64 go build -o $(BUILD_DIR)/toscactl-linux-amd64 -ldflags "-X main.version=$(VERSION) -X main.commit=$(COMMIT)" ./cmd/toscactl
+	cd $(ROOT_DIR)/client
+	./gradlew bootJar
+	cp $(ROOT_DIR)/client/build/libs/*.jar $(BUILD_DIR)/toscactl-linux-amd64
 
 test:
 	cd $(ROOT_DIR)
