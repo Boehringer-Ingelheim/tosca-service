@@ -86,9 +86,7 @@ jobs:
         if: github.event_name == 'release' || github.event_name == 'prerelease'
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: |
-            client/build/libs/*.jar
-            client/build/*.jar
+          file: client/build/*.jar
           tag: ${{ needs.precheck.outputs.branchTag }}
           overwrite: true
           file_glob: true
