@@ -70,13 +70,17 @@ jobs:
         run: cd client && ./gradlew bootJar
       - name: Build toscactl-linux-amd64
         run: cd client && make build_linux VERSION=${{ needs.precheck.outputs.version }} COMMIT=$(git rev-parse HEAD)
-      - name: 'Archive JAR and toscactl-linux-amd64'
+      - name: List build directory
+        run: |
+          ls -la client/build/
+          ls -la client/build/libs/
+      - name: Archive JAR
         uses: actions/upload-artifact@v4
         with:
           name: app-${{ needs.precheck.outputs.full_version }}
           path: |
             client/build/libs/*.jar
-            client/build/toscactl-linux-amd64*
+            client/build/*.jar
       - name: Release Asset Upload
         uses: svenstaro/upload-release-action@v2
         if: github.event_name == 'release' || github.event_name == 'prerelease'
