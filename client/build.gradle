@@ -72,6 +72,7 @@ graalvmNative {
     binaries {
         main {
             imageName = 'toscactl-linux-amd64'
+            mainClass = 'com.edptoscaqs.toscaservice.ToscaCLI'
         }
     }
 }
