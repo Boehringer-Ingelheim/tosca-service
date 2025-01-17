@@ -14,8 +14,8 @@ build_jar: build_prepare
 	./gradlew build
 
 build_linux: build_prepare
-	cd $(ROOT_DIR) && ./gradlew bootJar
-	cp $(ROOT_DIR)/build/libs/*.jar $(BUILD_DIR)/toscactl-linux-amd64.jar
+	cd $(ROOT_DIR) && ./gradlew nativeBuild
+	cp $(ROOT_DIR)/build/native/nativeCompile/toscactl-linux-amd64 $(BUILD_DIR)/toscactl-linux-amd64
 
 test:
 	cd $(ROOT_DIR)
