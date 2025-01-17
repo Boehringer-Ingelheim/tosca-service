@@ -73,6 +73,8 @@ jobs:
           mv toscactl toscactl-linux-amd64
       - name: List build directory
         run: |
+          ls -la client/
+          ls -la client/docker/
           ls -la client/build/
           ls -la client/build/libs/
       - name: Release Asset Upload
