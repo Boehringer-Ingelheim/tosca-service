@@ -7,9 +7,10 @@ buildscript {
 plugins {
     id 'jacoco'
     id 'maven-publish'
-	id 'java'
-	id 'org.springframework.boot' version '2.7.1'
-	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+    id 'java'
+    id 'org.springframework.boot' version '2.7.6'
+    id 'io.spring.dependency-management' version '1.0.13.RELEASE'
+    id 'org.graalvm.buildtools.native' version '0.9.28'
 }
 
 group = 'edptoscaqs'
@@ -23,14 +24,14 @@ repositories {
 ext['log4j2.version'] = '2.17.0'
 
 ext {
-	set('snippetsDir', file("build/generated-snippets"))
+    set('snippetsDir', file("build/generated-snippets"))
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	implementation 'org.springframework.boot:spring-boot-starter-data-rest'
-	implementation 'org.springframework.boot:spring-boot-starter-security'
-	implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-data-rest'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'javax.validation:validation-api:2.0.1.Final'
     implementation 'org.apache.commons:commons-text:1.10.0'
     implementation 'org.hibernate.validator:hibernate-validator:7.0.1.Final'
@@ -41,11 +42,9 @@ dependencies {
     runtimeOnly 'com.h2database:h2'
     testImplementation group: 'org.mockito', name: 'mockito-all', version: '1.10.19'
     testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
-    testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
     testImplementation group: 'org.assertj', name: 'assertj-core', version: '3.24.2'
     testImplementation 'org.springframework.security:spring-security-test'
 }
-
 
 bootJar {
     archiveFileName = "app.jar"
@@ -65,6 +64,15 @@ publishing {
             groupId = group
             version = "${version}"
             from components.java
+        }
+    }
+}
+
+graalvmNative {
+    binaries {
+        main {
+            imageName = 'toscactl-linux-amd64'
+            mainClass = 'com.edptoscaqs.toscaservice.ToscaCLI'
         }
     }
 }
