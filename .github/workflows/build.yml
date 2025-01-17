@@ -60,6 +60,11 @@ jobs:
         with:
           distribution: 'adopt'
           java-version: '17'
+      - name: Setup GraalVM
+        uses: graalvm/setup-graalvm@v1
+        with:
+          graalvm-version: '21.3.0'
+          java-version: '17'
       - name: Grant execute permission for gradlew
         run: cd client && chmod +x gradlew
       - name: Build
@@ -68,27 +73,27 @@ jobs:
         run: cd client && ./gradlew test
       - name: Package
         run: cd client && ./gradlew bootJar
-      - name: Build toscactl-linux-amd64
+      - name: Build Native Image
         run: cd client && make build_linux VERSION=${{ needs.precheck.outputs.version }} COMMIT=$(git rev-parse HEAD)
       - name: List build directory
         run: |
           ls -la client/build/
           ls -la client/build/libs/
-      - name: Archive JAR
+          ls -la client/build/native/nativeCompile/
+      - name: Archive files
         uses: actions/upload-artifact@v4
         with:
           name: app-${{ needs.precheck.outputs.full_version }}
           path: |
-            client/build/libs/*.jar
             client/build/*.jar
+            client/build/libs/*.jar
+            client/build/native/nativeCompile/toscactl-linux-amd64
       - name: Release Asset Upload
         uses: svenstaro/upload-release-action@v2
         if: github.event_name == 'release' || github.event_name == 'prerelease'
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: |
-            client/build/libs/*.jar
-            client/build/toscactl-linux-amd64*
+          file: client/build/native/nativeCompile/toscactl-linux-amd64
           tag: ${{ needs.precheck.outputs.branchTag }}
           overwrite: true
           file_glob: true
