@@ -7,15 +7,11 @@ VERSION=v0.1
 COMMIT=`git rev-parse --short=4 HEAD`
 BUILD_TIME=`date +"%m/%d/%Y %H:%M:%S"`
 
-build: get build_jar build_linux
+build: get build_jar package
 
 build_jar: build_prepare
 	cd $(ROOT_DIR)
 	./gradlew build
-
-build_linux: build_prepare
-	cd $(ROOT_DIR) && ./gradlew bootJar
-	cp $(ROOT_DIR)/build/libs/*.jar $(BUILD_DIR)/toscactl-linux-amd64.jar
 
 test:
 	cd $(ROOT_DIR)
@@ -31,3 +27,8 @@ get:
 
 build_prepare:
 	mkdir -p "$(BUILD_DIR)"
+
+package:
+	cd $(ROOT_DIR)/client
+	jpackage --input docker/ --name toscactl --main-jar app.jar --main-class org.springframework.boot.loader.JarLauncher --java-options "--enable-preview" --type app-image
+	zip -r toscactl.zip toscactl

@@ -63,30 +63,20 @@ jobs:
       - name: Grant execute permission for gradlew
         run: cd client && chmod +x gradlew
       - name: Build
-        run: cd client && ./gradlew build
+        run: cd client && ./gradlew clean build
       - name: Test
         run: cd client && ./gradlew test
-      - name: Package
-        run: cd client && ./gradlew bootJar
-      - name: Build toscactl-linux-amd64
-        run: cd client && make build_linux VERSION=${{ needs.precheck.outputs.version }} COMMIT=$(git rev-parse HEAD)
-      - name: List build directory
+      - name: Package Application
         run: |
-          ls -la client/build/
-          ls -la client/build/libs/
-      - name: Archive JAR
-        uses: actions/upload-artifact@v4
-        with:
-          name: app-${{ needs.precheck.outputs.full_version }}
-          path: |
-            client/build/libs/*.jar
-            client/build/*.jar
+          cd client
+          jpackage --input docker/ --name toscactl --main-jar app.jar --main-class org.springframework.boot.loader.JarLauncher --java-options "--enable-preview" --type app-image --verbose
+          zip -r toscactl.zip toscactl
       - name: Release Asset Upload
         uses: svenstaro/upload-release-action@v2
         if: github.event_name == 'release' || github.event_name == 'prerelease'
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: client/build/*.jar
+          file: client/toscactl.zip
           tag: ${{ needs.precheck.outputs.branchTag }}
           overwrite: true
           file_glob: true
