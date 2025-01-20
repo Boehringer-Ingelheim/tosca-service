@@ -72,7 +72,10 @@ jobs:
       - name: Package Application
         run: |
           cd client
+          ls -l docker/
           jpackage --input docker/ --name toscactl --main-jar app.jar --main-class org.springframework.boot.loader.JarLauncher --java-options "--enable-preview" --type app-image --verbose
+          ls -l toscactl
+          ls -l toscactl/bin/toscactl
           mv toscactl/bin/toscactl toscactl-linux-amd64
       - name: Verify Executable
         run: |
