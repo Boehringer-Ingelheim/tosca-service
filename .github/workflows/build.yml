@@ -66,18 +66,14 @@ jobs:
         run: cd client && ./gradlew clean build
       - name: Test
         run: cd client && ./gradlew test
+      - name: Verify app.jar
+        run: |
+          jar tf client/docker/app.jar
       - name: Package Application
         run: |
           cd client
           jpackage --input docker/ --name toscactl --main-jar app.jar --main-class org.springframework.boot.loader.JarLauncher --java-options "--enable-preview" --type app-image
           mv toscactl/bin/toscactl toscactl-linux-amd64
-      - name: Verify File Exists
-        run: |
-          ls -la client/
-          ls -la client/docker/
-          ls -la client/toscactl/
-          ls -la client/toscactl/bin
-          ls -la client/toscactl/lib
       - name: Verify Executable
         run: |
           file client/toscactl-linux-amd64
