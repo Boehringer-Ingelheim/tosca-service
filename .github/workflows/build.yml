@@ -75,7 +75,7 @@ jobs:
           ls -la client/
           ls -la client/build/
           ls -la client/build/libs/
-          ls -la client/build/docker/
+          ls -la client/docker/
       - name: Release Asset Upload
         uses: svenstaro/upload-release-action@v2
         if: github.event_name == 'release' || github.event_name == 'prerelease'
