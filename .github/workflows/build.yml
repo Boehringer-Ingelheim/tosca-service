@@ -72,7 +72,11 @@ jobs:
           jpackage --input docker/ --name toscactl --main-jar app.jar --main-class org.springframework.boot.loader.JarLauncher --java-options "--enable-preview" --type app-image
           mv toscactl toscactl-linux-amd64
       - name: Verify File Exists
-        run: ls -l client/toscactl-linux-amd64
+        run: |
+          ls -la client/
+          ls -la client/build/
+          ls -la client/build/libs/
+          ls -la client/build/native/nativeCompile/
       - name: Release Asset Upload
         uses: svenstaro/upload-release-action@v2
         if: github.event_name == 'release' || github.event_name == 'prerelease'
