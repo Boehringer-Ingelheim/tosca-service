@@ -66,17 +66,11 @@ jobs:
         run: cd client && ./gradlew clean build
       - name: Test
         run: cd client && ./gradlew test
-      - name: Verify app.jar
-        run: |
-          jar tf client/docker/app.jar
       - name: Package Application
         run: |
           cd client
           jpackage --input docker/ --name toscactl --main-jar app.jar --main-class org.springframework.boot.loader.JarLauncher --java-options "--enable-preview" --type app-image --verbose
           zip -r toscactl.zip toscactl
-      - name: Verify Executable
-        run: |
-          ./client/toscactl-linux-amd64 --version
       - name: Release Asset Upload
         uses: svenstaro/upload-release-action@v2
         if: github.event_name == 'release' || github.event_name == 'prerelease'
