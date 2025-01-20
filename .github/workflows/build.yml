@@ -66,6 +66,12 @@ jobs:
         run: cd client && ./gradlew clean build
       - name: Test
         run: cd client && ./gradlew test
+      - name: Verify File Exists
+        run: |
+          ls -la client/
+          ls -la client/docker/
+          ls -la client/toscactl/bin
+          ls -la client/toscactl/lib
       - name: Package Application
         run: |
           cd client
