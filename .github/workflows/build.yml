@@ -66,16 +66,17 @@ jobs:
         run: cd client && ./gradlew clean build
       - name: Test
         run: cd client && ./gradlew test
-      - name: Verify File Exists
-        run: |
-          ls -la client/
-          ls -la client/docker/
-          ls -la client/toscactl/bin
-          ls -la client/toscactl/lib
       - name: Package Application
         run: |
           cd client
           jpackage --input docker/ --name toscactl --main-jar app.jar --main-class org.springframework.boot.loader.JarLauncher --java-options "--enable-preview" --type app-image
+      - name: Verify File Exists
+        run: |
+          ls -la client/
+          ls -la client/docker/
+          ls -la client/toscactl/
+          ls -la client/toscactl/bin
+          ls -la client/toscactl/lib
       - name: Release Asset Upload
         uses: svenstaro/upload-release-action@v2
         if: github.event_name == 'release' || github.event_name == 'prerelease'
