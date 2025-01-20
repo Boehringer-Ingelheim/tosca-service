@@ -35,15 +35,15 @@ jobs:
         id: get_version
         run: |
           VERSION_FILE=$(cat VERSION)
-          echo ::set-output name=branchTag::$(echo $GITHUB_REF | cut -d / -f 3)
+          echo "branchTag=$(echo $GITHUB_REF | cut -d / -f 3)" >> $GITHUB_ENV
           if [[ "$VERSION_FILE" =~ ^v([0-9]+)\.([0-9]+)(\.([0-9]+))?(\.([0-9]+))?$ ]] ; then
                VERSION=${VERSION_FILE}.${{ github.run_number }}
                VERSION_NUMBER=$(echo  "${VERSION_FILE}" | cut -d "v" -f 2).${{ github.run_number }}
                SHORT_COMMIT=$(git rev-parse --short=4 HEAD)
                FULL_VERSION="${VERSION}_${SHORT_COMMIT}"
-               echo ::set-output name=full_version::${FULL_VERSION}
-               echo ::set-output name=version::${VERSION}
-               echo ::set-output name=version_number::${VERSION_NUMBER}
+               echo "full_version=${FULL_VERSION}" >> $GITHUB_ENV
+               echo "version=${VERSION}" >> $GITHUB_ENV
+               echo "version_number=${VERSION_NUMBER}" >> $GITHUB_ENV
           else
                echo "VERSION file doesn't have valid version format: ^v([0-9]+)\.([0-9]+)(\.([0-9]+))?(\.([0-9]+))?$"
                exit 1
@@ -70,12 +70,7 @@ jobs:
         run: |
           cd client
           jpackage --input docker/ --name toscactl --main-jar app.jar --main-class org.springframework.boot.loader.JarLauncher --java-options "--enable-preview" --type app-image
-      - name: Verify File Exists
-        run: |
-          ls -la client/
-          ls -la client/build/
-          ls -la client/build/libs/
-          ls -la client/docker/
+          mv toscactl/bin/toscactl toscactl-linux-amd64
       - name: Release Asset Upload
         uses: svenstaro/upload-release-action@v2
         if: github.event_name == 'release' || github.event_name == 'prerelease'
