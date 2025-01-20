@@ -79,7 +79,7 @@ jobs:
           mv toscactl/bin/toscactl toscactl-linux-amd64
       - name: Verify Executable
         run: |
-          file client/toscactl-linux-amd64
+          ./client/toscactl-linux-amd64 --version
       - name: Release Asset Upload
         uses: svenstaro/upload-release-action@v2
         if: github.event_name == 'release' || github.event_name == 'prerelease'
