@@ -72,11 +72,8 @@ jobs:
       - name: Package Application
         run: |
           cd client
-          ls -l docker/
           jpackage --input docker/ --name toscactl --main-jar app.jar --main-class org.springframework.boot.loader.JarLauncher --java-options "--enable-preview" --type app-image --verbose
-          ls -l toscactl
-          ls -l toscactl/bin/toscactl
-          mv toscactl/bin/toscactl toscactl-linux-amd64
+          zip -r toscactl.zip toscactl
       - name: Verify Executable
         run: |
           ./client/toscactl-linux-amd64 --version
@@ -85,7 +82,7 @@ jobs:
         if: github.event_name == 'release' || github.event_name == 'prerelease'
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: client/toscactl-linux-amd64
+          file: client/toscactl.zip
           tag: ${{ needs.precheck.outputs.branchTag }}
           overwrite: true
           file_glob: true
