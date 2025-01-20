@@ -78,6 +78,9 @@ jobs:
           ls -la client/toscactl/
           ls -la client/toscactl/bin
           ls -la client/toscactl/lib
+      - name: Verify Executable
+        run: |
+          file client/toscactl-linux-amd64
       - name: Release Asset Upload
         uses: svenstaro/upload-release-action@v2
         if: github.event_name == 'release' || github.event_name == 'prerelease'
