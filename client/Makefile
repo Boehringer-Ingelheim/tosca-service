@@ -29,6 +29,6 @@ build_prepare:
 	mkdir -p "$(BUILD_DIR)"
 
 package:
-	cd $(ROOT_DIR)
+	cd $(ROOT_DIR)/client
 	jpackage --input docker/ --name toscactl --main-jar app.jar --main-class org.springframework.boot.loader.JarLauncher --java-options "--enable-preview" --type app-image
-	mv toscactl toscactl-linux-amd64
+	mv toscactl/bin/toscactl toscactl-linux-amd64
